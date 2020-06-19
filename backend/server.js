@@ -85,32 +85,55 @@ app.post('/export', (req, res) => {
     // ref.once("value", function(snapshot) {
     //   console.log(snapshot.val());
     // });
-
+var data = [];
+var count = 0;
     var newUsersRef = ref.push();
-    newUsersRef.set({
-        username: "seven",
-        text: text
-    });
-
-    var data = [];
-    ref.once("value", function(snapshot) {
+	ref.once("value", function(snapshot) {
       snapshot.forEach(function(childSnapshot) {
-        if (childSnapshot.val().username == 'seven') {
-          console.log(childSnapshot.val());
-          data.push(childSnapshot.val())
-          
-        }
-        // var childKey = childSnapshot.key;
-        // var childData = childSnapshot.val().username;
-        // console.log('Key: '+childKey+' ,Data: ' + childData)
-    });
-    return res.json({ defaultText: data, error: false });
+		  console.log(childSnapshot.val())
+		  if (text!=null){
+			  if (childSnapshot.val().username == 'wendy' && childSnapshot.val().text == text) {
+				
+				count += 1;
+				data.push(childSnapshot.val());
+			} 
+		  }			
+		//else {
+		//	return res.json({ defaultText: "Data already exist", error: true });
+		//}
+	  })
+	  console.log("Count", count);
+	  if (text != '' && count == 0) {
+		 newUsersRef.set({
+			username: "wendy",
+			text: text
+		 });
+	  } else {
+		  return res.json({ defaultText: data, error: true });
+	  }
+	})
+	
+    //var data = [];
+    //ref.once("value", function(snapshot) {
+    //  snapshot.forEach(function(childSnapshot) {
+    //    if (childSnapshot.val().username == 'seven' && childSnapshot.val().text != text) {
+    //      console.log(childSnapshot.val());
+    //      data.push(childSnapshot.val())
+    //      return res.json({ defaultText: data, error: false });
+    //    } else {
+	//		return res.json({ defaultText: data, error: true });
+	//	}
+    //    // var childKey = childSnapshot.key;
+    //    // var childData = childSnapshot.val().username;
+    //    // console.log('Key: '+childKey+' ,Data: ' + childData)
+    //});
+	//    return res.json({ defaultText: data, error: false });
       // if (snapshot.val().username == 'seven') {
       //   console.log(snapshot.val());
       // }
     });
     // return res.json({ message: 'Text has been spoken.', error: false });
-  })
+//  })
 // })
 
 // var ref = admin.database().ref("texttospeech");
