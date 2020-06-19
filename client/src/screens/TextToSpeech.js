@@ -1,177 +1,219 @@
 import React from 'react';
-import { Dimensions, KeyboardAvoidingView, View, ScrollView, StyleSheet } from 'react-native';
-import { Text, Block, Button, Input } from 'galio-framework';
-import theme from '../theme';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
+import { TouchableHighlight, Dimensions, KeyboardAvoidingView, View, ScrollView, StyleSheet, Modal, Alert } from 'react-native';
+import { theme, Toast, Text, Block, Button, Input, Card } from 'galio-framework';
 import tts from 'react-native-tts';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
+// import Modal from 'react-native-modal';
 
 const { height, width } = Dimensions.get('window');
 
 export default class TextToSpeech extends React.Component {
-    constructor() {
-        super();
-        this.state = {
-            text: '',
-            defaultText: [],
-            isChange: null,
-            isEntered: false,
-            buttonsListArr : []
-        };
-    }
+    state = {
+        text: "",
+        message: "",
+        isVisible: false,
+        isFavourite: false
+    };
 
     handleChange = (text, field) => {
         const state = this.state
         state[field] = text;
         this.setState(state);
-        this.setState({isEntered: true})
     }
 
-    speak = (text) => {
-        // text = this.state.text;
-        if (this.state.isEntered == true || this.state.isChange == null || this.state.isChange == true) {
+    // Convert entered text to speech
+    convert = (text) => {
+        tts.getInitStatus().then(() => {
             tts.speak(text);
-        }
-    }
-
-    convert = async () => {
-        console.log("Text: " + this.state.text)
-        fetch('http://127:5000/say', {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                "text" : this.state.text
-            })
-        })
-        .catch(function(error) {
-          console.log('There has been a problem with your fetch operation: ' + error.message);
-          // ADD THIS THROW error
-          throw error;
         });
     }
 
+    // Save favourite used word
     save = async () => {
-        console.log("Text: " + this.state.text)
-        fetch('http://localhost:5000/export', {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-       
-              },
-            body: JSON.stringify({
-                "text" : this.state.text
-            })
-        }).then((response) => response.json())
-        .then((responseData) => {
-        //   console.log(responseData);
-          this.setState({defaultText:responseData.defaultText});
-          this.setState({isChange: true});
-          console.log(this.state);  
-        })
-        .catch(function(error) {
-          console.log('There has been a problem with your fetch operation: ' + error.message);
-          // ADD THIS THROW error
-          throw error;
-        });
-    }
-
-    componentDidMount() {
-        if (this.state.isChange == null || this.state.isChange == true ) {
-            fetch('http://localhost:5000/retrieve',{
-                method: 'GET',
+        if (this.state.text != '') {
+            fetch('https://communicator-server.herokuapp.com/tts/save', {
+                method: 'POST',
                 headers: {
                     'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                }
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    "text": this.state.text
+                })
             }).then((response) => response.json())
-            .then((responseData) => {
-            // console.log(responseData);
-            this.setState({defaultText:responseData.defaultText});
-            console.log(this.state.defaultText);            
-            })
-            .catch(error => console.warn(error));
+                .then((responseData) => {
+                    this.setState({
+                        message: responseData.message,
+                        isVisible: !this.state.isVisible,
+                        // isFavourite: !this.state.isFavourite
+                    });
+                })
+                .catch(function (error) {
+                    console.log('There has been a problem with your fetch operation: ' + error.message);
+                    throw error;
+                });
+        } else {
+            Alert.alert("Text cannot be null!")
         }
     }
 
-    renderDefaultText = () => {
-        return(
-            this.state.buttonsListArr = this.state.defaultText.map(buttonInfo => (
-                <Button 
-                key={buttonInfo.text}
-                onPress={() => this.speak(buttonInfo.text) }>
-                    {buttonInfo.text}
-                </Button>
-            ))
+    renderModal = (message) => {
+        return (
+            <View style={styles.centeredView}>
+                <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={this.state.isVisible}
+                >
+                    <View style={styles.centeredView}>
+                        <View style={styles.modalView}>
+                            <Text style={styles.modalText}>{message}</Text>
+                            <Button
+                                style={styles.modalButton}
+                                color="error"
+                                round
+                                onPress={() => this.setState({ isVisible: !this.state.isVisible })}
+                            >
+                                Close
+                            </Button>
+                        </View>
+                    </View>
+                </Modal>
+            </View>
         )
     }
-    // renderDefaultText = () => {
-    //     console.log(this.state.defaultText.length);
-    //     for(var i=0;i<this.state.defaultText.length;i++) {
-    //         console.log(this.state.defaultText[0].text);
-    //         console.log(this.state.defaultText[1].text);
-    //         console.log(this.state.defaultText[2].text);
-    //         // var text = this.state.defaultText[i].text;
-    //         <Button>{this.state.defaultText[i].text}</Button>
-    //         return(
-    //             component+=component
-    //         )
-    //     }
-    // }
 
-    render(){
-        return( 
-        <Block safe flex style={styles.block}>
-            <Header title='Text To Speech'/>
-            
-                <KeyboardAvoidingView style={{flex: 1}}  behavior="height" enabled>
-                    <View style={{flex: 0.9}}>
-                    <Block>
-                        <ScrollView>
-                        <Input 
-                        label='Text'
-                        placeholder='Please enter the text you would like to translate.'
-                        style={styles.input}
-                        onChangeText={(text) => this.handleChange(text, 'text')}
-                        />
-                        </ScrollView>
-                        <Block>
-                        <Button 
-                            style={styles.button}
-                            onPress={() => this.speak(this.state.text) }>
-                            Convert
-                        </Button>
-                        <Button 
-                            style={styles.button}
-                            onPress={() => this.save() }>Save</Button>
+    renderIcon = () => {
+        if (this.state.isFavourite == false) {
+            return (
+                <FontAwesome
+                    name='star-o'
+                    size={20}
+                />
+            )
+        } else {
+            return (
+                <MaterialIcons
+                    name='star'
+                    size={20}
+                />
+            )
+        }
+    }
+
+    render() {
+        const { navigation } = this.props;
+        return (
+            <Block flex style={styles.block}>
+                <ScrollView showsVerticalScrollIndicator={false}>
+                    <KeyboardAvoidingView style={{ flex: 1 }} behavior="height" enabled>
+                        <Block flex right>
+                            <TouchableHighlight onPress={() => this.save()}>
+                                {this.renderIcon()}
+                            </TouchableHighlight>
                         </Block>
                         <Block>
-                        <ScrollView>
-                        {this.renderDefaultText()}
-                        </ScrollView>
+                            <Input
+                            id={1}
+                                color={theme.COLORS.BLACK}
+                                label='Text'
+                                placeholder='Please enter the text you would like to translate.'
+                                style={styles.input}
+                                icon = "cancel"
+                                family = "MaterialIcons"
+                                right
+                                onChangeText={(text) => this.handleChange(text, 'text')}
+                            />
                         </Block>
-                    </Block>
-                    </View>
-                <Footer/>
-            </KeyboardAvoidingView>
-            
-        </Block>
+                        <Block>
+                            <Button
+                                style={styles.button}
+                                color='info'
+                                onPress={() => this.convert(this.state.text)}>
+                                Convert
+                            </Button>
+                        </Block>
+                        <Block flex middle right>
+                            <Button
+                                color="success"
+                                onlyIcon
+                                large
+                                style={styles.favouriteButton}
+                                icon="navigate-next"
+                                iconFamily="MaterialIcons"
+                                onPress={() => navigation.navigate('FavouriteText')}>
+                                Go to favourite
+                            </Button>
+                            <Text size={8} muted>Go to favourite</Text>
+                            {this.renderModal(this.state.message)}
+                        </Block>
+                    </KeyboardAvoidingView>
+                </ScrollView>
+            </Block>
         )
     }
 }
 
 const styles = StyleSheet.create({
     block: {
-        margin: 10,
-        backgroundColor: theme.COLORS.WHITE
+        padding: theme.SIZES.BASE,
+        paddingBottom: theme.SIZES.BASE * 5,
+        paddingVertical: theme.SIZES.BASE,
+        margin: 10
     },
     input: {
-        height: height * 0.2
+        padding: theme.SIZES.BASE,
+        height: height * 0.2,
     },
     button: {
-        margin:10
+        width: width - 64,
+        padding: theme.SIZES.BASE,
+        margin: 10
+    },
+    favouriteButton: {
+        width: (width - 64) / 5,
+        padding: theme.SIZES.BASE,
+        marginTop: 20
+    },
+    modalButton: {
+        width: width/4
+    },
+    centeredView: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        margin: 10,
+        marginTop: 22
+    },
+    modalView: {
+        margin: 20,
+        backgroundColor: "white",
+        borderRadius: 20,
+        padding: 35,
+        alignItems: "center",
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5
+    },
+    openButton: {
+        backgroundColor: "#F194FF",
+        borderRadius: 20,
+        padding: 10,
+        elevation: 2
+    },
+    textStyle: {
+        color: "white",
+        fontWeight: "bold",
+        textAlign: "center"
+    },
+    modalText: {
+        marginBottom: 15,
+        textAlign: "center"
     }
 })

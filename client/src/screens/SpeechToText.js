@@ -1,4 +1,3 @@
-//Example to Convert Speech to Text in React Native - Voice Recognition
 import React, { Component } from 'react';
 import {
   StyleSheet,
@@ -8,11 +7,18 @@ import {
   Image,
   TouchableHighlight,
   ScrollView,
+  Dimensions
 } from 'react-native';
 import Voice from '@react-native-community/voice';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import Feather from 'react-native-vector-icons/Feather';
+import { Block, theme } from 'galio-framework';
 
-class SpeechToText extends Component {
+const { height, width } = Dimensions.get('screen');
+
+export default class SpeechToText extends Component {
   state = {
+    onClick: false,
     pitch: '',
     error: '',
     end: '',
@@ -142,63 +148,37 @@ class SpeechToText extends Component {
     });
   };
 
+  // renderIcon = () => {
+  //   if (this.state.started=' ') {
+  //     return (
+  //       <FontAwesome
+  //     size={(height - 288) / 6}
+  //     name='microphone'
+  //   />
+  //     );
+  //   } else {
+  //     return (
+  //       <Feather
+  //     size={(height - 288) / 6}
+  //     name='loader'
+  //   />
+  //     );
+  //   }
+  // }
+
   render() {
     return (
       <SafeAreaView style={{ flex: 1 }}>
         <View style={styles.container}>
-          <Text style={styles.welcome}>
-            Example of Speech to Text conversion / Voice Recognition
+          <Text muted style={styles.instructions}>
+            Press the mic to speak
           </Text>
-          <Text style={styles.instructions}>
-            Press mike to start Recognition
-          </Text>
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              paddingVertical: 10,
-            }}>
-            <Text
-              style={{
-                flex: 1,
-                textAlign: 'center',
-                color: '#B0171F',
-              }}>{`Started: ${this.state.started}`}</Text>
-            <Text
-              style={{
-                flex: 1,
-                textAlign: 'center',
-                color: '#B0171F',
-              }}>{`End: ${this.state.end}`}</Text>
-          </View>
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              paddingVertical: 10,
-            }}>
-            <Text
-              style={{
-                flex: 1,
-                textAlign: 'center',
-                color: '#B0171F',
-              }}>{`Pitch \n ${this.state.pitch}`}</Text>
-            <Text
-              style={{
-                flex: 1,
-                textAlign: 'center',
-                color: '#B0171F',
-              }}>{`Error \n ${this.state.error}`}</Text>
-          </View>
           <TouchableHighlight
             onPress={this._startRecognizing}
             style={{ marginVertical: 20 }}>
-            <Image
-              style={styles.button}
-              source={{
-                uri:
-                  'https://raw.githubusercontent.com/AboutReact/sampleresource/master/microphone.png',
-              }}
+            <FontAwesome
+              size={(height - 288) / 6}
+              name='microphone'
             />
           </TouchableHighlight>
           <Text
@@ -208,7 +188,7 @@ class SpeechToText extends Component {
               marginBottom: 1,
               fontWeight: '700',
             }}>
-            Partial Results
+            Results
           </Text>
           <ScrollView>
             {this.state.partialResults.map((result, index) => {
@@ -216,6 +196,7 @@ class SpeechToText extends Component {
                 <Text
                   key={`partial-result-${index}`}
                   style={{
+                    fontSize: 16,
                     textAlign: 'center',
                     color: '#B0171F',
                     marginBottom: 1,
@@ -226,39 +207,6 @@ class SpeechToText extends Component {
               );
             })}
           </ScrollView>
-          <Text style={styles.stat}>Results</Text>
-          <ScrollView style={{ marginBottom: 42 }}>
-            {this.state.results.map((result, index) => {
-              return (
-                <Text key={`result-${index}`} style={styles.stat}>
-                  {result}
-                </Text>
-              );
-            })}
-          </ScrollView>
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'space-between',
-              position: 'absolute',
-              bottom: 0,
-            }}>
-            <TouchableHighlight
-              onPress={this._stopRecognizing}
-              style={{ flex: 1, backgroundColor: 'red' }}>
-              <Text style={styles.action}>Stop</Text>
-            </TouchableHighlight>
-            <TouchableHighlight
-              onPress={this._cancelRecognizing}
-              style={{ flex: 1, backgroundColor: 'red' }}>
-              <Text style={styles.action}>Cancel</Text>
-            </TouchableHighlight>
-            <TouchableHighlight
-              onPress={this._destroyRecognizer}
-              style={{ flex: 1, backgroundColor: 'red' }}>
-              <Text style={styles.action}>Destroy</Text>
-            </TouchableHighlight>
-          </View>
         </View>
       </SafeAreaView>
     );
@@ -274,7 +222,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'column',
     alignItems: 'center',
-    backgroundColor: '#F5FCFF',
+    // backgroundColor: '#F5FCFF',
   },
   welcome: {
     fontSize: 20,
@@ -292,7 +240,8 @@ const styles = StyleSheet.create({
   instructions: {
     textAlign: 'center',
     color: '#333333',
-    marginBottom: 5,
+    marginBottom: theme.SIZES.BASE,
+    marginTop: theme.SIZES.BASE
   },
   stat: {
     textAlign: 'center',
@@ -301,4 +250,3 @@ const styles = StyleSheet.create({
     marginTop: 30,
   },
 });
-export default SpeechToText;

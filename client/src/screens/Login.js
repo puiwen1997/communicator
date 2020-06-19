@@ -3,14 +3,14 @@ import {
   TouchableOpacity, Alert, Dimensions, KeyboardAvoidingView, StyleSheet, Platform,
 } from 'react-native';
 // import db from '../Firebase';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
+// import Header from '../components/Header';
+// import Footer from '../components/Footer';
 
 // galio component
 import {
-  Block, Button, Input, NavBar, Text, Icon
+  theme, Block, Button, Input, NavBar, Text, Icon
 } from 'galio-framework';
-import theme from '../theme';
+// import theme from '../theme';
 
 const { height, width } = Dimensions.get('window');
 
@@ -48,26 +48,26 @@ class Login extends React.Component {
   //   console.log('saving');
   //   this.addItem(this.state.email, this.state.password)
   //   alert("Success")
-    // this.setState({
-    //   isLoading: true,
-    // });
-    // this.dbRef.add({
-    //   email: this.state.email,
-    //   password: this.state.password
-    // }).then((res) => {
-    //   this.setState({
-    //     email: '',
-    //     password: '',
-    //     isLoading: false,
-    //   })
-    //   this.props.navigation.navigate('Home')
-    //   .catch((error) => {
-    //     console.error("Error adding document: ", error);
-    //     this.setState({
-    //       isLoading: false,
-    //     });
-    //   });
-    //   console.log("Save");
+  // this.setState({
+  //   isLoading: true,
+  // });
+  // this.dbRef.add({
+  //   email: this.state.email,
+  //   password: this.state.password
+  // }).then((res) => {
+  //   this.setState({
+  //     email: '',
+  //     password: '',
+  //     isLoading: false,
+  //   })
+  //   this.props.navigation.navigate('Home')
+  //   .catch((error) => {
+  //     console.error("Error adding document: ", error);
+  //     this.setState({
+  //       isLoading: false,
+  //     });
+  //   });
+  //   console.log("Save");
   // }
 
   render() {
@@ -76,9 +76,9 @@ class Login extends React.Component {
 
     return (
       <Block safe flex style={{ backgroundColor: theme.COLORS.WHITE }}>
-        <Header title='Sign In'/>
+        {/* <Header title='Sign In'/> */}
         <KeyboardAvoidingView style={styles.container} behavior="height" enabled>
-          <Block flex center style={{ marginTop: theme.SIZES.BASE * 1.875, marginBottom: height * 0.1 }}>
+          {/* <Block flex center style={{ marginTop: theme.SIZES.BASE * 1.875, marginBottom: height * 0.1 }}>
             <Text muted center size={theme.SIZES.FONT * 0.875} style={{ paddingHorizontal: theme.SIZES.BASE * 2.3 }}>
               This is the perfect place to write a short description
               of this step and even the next steps ahead
@@ -130,13 +130,13 @@ class Login extends React.Component {
             <Text muted center size={theme.SIZES.FONT * 0.875}>
               or be classical
             </Text>
-          </Block>
+          </Block> */}
 
           <Block flex={2} center space="evenly">
             <Block flex={2}>
               <Input
+                type="email-address"
                 rounded
-                type="text"
                 placeholder="Email"
                 autoCapitalize="none"
                 style={{ width: width * 0.9 }}
@@ -145,8 +145,8 @@ class Login extends React.Component {
               />
               <Input
                 rounded
-                type="text"
-                // viewPass
+                password
+                viewPass
                 placeholder="Password"
                 style={{ width: width * 0.9 }}
                 value={this.state.password}
@@ -164,24 +164,24 @@ class Login extends React.Component {
             <Block flex middle>
               <Button
                 round
-                color="error"
-//                 onPress={() => Alert.alert(
-//                   'Sign in action',
-//                   `Email: ${email}
-// Password: ${password}`,
-                // onPress = {() => this.saveUser()}
+                color="info"
+              //                 onPress={() => Alert.alert(
+              //                   'Sign in action',
+              //                   `Email: ${email}
+              // Password: ${password}`,
+              // onPress = {() => this.saveUser()}
               >
                 Sign in
               </Button>
               <Button color="transparent" shadowless onPress={() => navigation.navigate('Register')}>
                 <Text center color={theme.COLORS.ERROR} size={theme.SIZES.FONT * 0.75}>
-                  {"Don't have an account? Sign Up"}
+                  {"Don't have an account? Click here to register"}
                 </Text>
               </Button>
             </Block>
           </Block>
         </KeyboardAvoidingView>
-        <Footer/>
+        {/* <Footer/> */}
       </Block>
     );
   }
