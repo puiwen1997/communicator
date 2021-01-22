@@ -1,205 +1,158 @@
 import React from 'react';
-import {
-  TouchableOpacity, Alert, Dimensions, KeyboardAvoidingView, StyleSheet, Platform,
-} from 'react-native';
-// import db from '../Firebase';
-// import Header from '../components/Header';
-// import Footer from '../components/Footer';
+import { View, ActivityIndicator, TouchableOpacity, Alert, Dimensions, ScrollView, KeyboardAvoidingView, StyleSheet, Platform, Image } from 'react-native';
 
-// galio component
+// Galio component
 import {
   theme, Block, Button, Input, NavBar, Text, Icon
 } from 'galio-framework';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
+import { firebase } from '../config/FirebaseConfig';
+import FirebaseAuthService from '../services/FirebaseAuthService'
+// import ConnectyCubeAuthService from '../services/ConnectyCubeAuthService';
+import ConnectyCubeUser from '../models/ConnectyCubeUser';
+import User from '../models/User';
 // import theme from '../theme';
 
 const { height, width } = Dimensions.get('window');
+const DEFAULT_PROFILE_PIC = "https://firebasestorage.googleapis.com/v0/b/myreactnative-33c0a.appspot.com/o/profilePicture%2Fdefault.png?alt=media&token=0d991cf8-8268-4db0-9650-dfad8e712189";
+const ICON = "https://firebasestorage.googleapis.com/v0/b/myreactnative-33c0a.appspot.com/o/icon%2Ficon.jpg?alt=media&token=f95bd882-7d3d-4d41-8c94-d37d5a34dacc"
 
 export default class Register extends React.Component {
-  constructor() {
-    super();
-    // this.dbRef = firebase.firestore().collection('user');
-    this.state = {
-      name: '',
-      phoneNo: '',
-      email: '',
-      password: '',
-      isLoading: false,
-    };
-  }
-
-  // state = {
-  //   email: '-',
-  //   password: '-',
-  // }
+  state = {
+    id: '',
+    full_name: '',
+    login: '',
+    phone: '',
+    email: '',
+    password: '',
+    emergencyContact: '',
+    photoURL: DEFAULT_PROFILE_PIC,
+    isLoading: false,
+    activIndicator: false,
+  };
 
   handleChange = (text, field) => {
     const state = this.state
     state[field] = text;
     this.setState(state);
-    console.log(state);
+    // console.log("State: ", state);
   }
-
-  // addItem = (email, password) => {
-  //   db.ref('/user').push({
-  //     email: this.state.email,
-  //     password: this.state.password
-  //   })
-  // }
-
-  // saveUser = () => {
-  //   console.log('saving');
-  //   this.addItem(this.state.email, this.state.password)
-  //   alert("Success")
-    // this.setState({
-    //   isLoading: true,
-    // });
-    // this.dbRef.add({
-    //   email: this.state.email,
-    //   password: this.state.password
-    // }).then((res) => {
-    //   this.setState({
-    //     email: '',
-    //     password: '',
-    //     isLoading: false,
-    //   })
-    //   this.props.navigation.navigate('Home')
-    //   .catch((error) => {
-    //     console.error("Error adding document: ", error);
-    //     this.setState({
-    //       isLoading: false,
-    //     });
-    //   });
-    //   console.log("Save");
-  // }
 
   render() {
     const { navigation } = this.props;
-    // const { email, password } = this.state;
-
+    const { activIndicator } = this.state;
     return (
-      <Block safe flex style={{ backgroundColor: theme.COLORS.WHITE }}>
-        {/* <Header title='Sign In'/> */}
-        <KeyboardAvoidingView style={styles.container} behavior="height" enabled>
-          {/* <Block flex center style={{ marginTop: theme.SIZES.BASE * 1.875, marginBottom: height * 0.1 }}>
-            <Text muted center size={theme.SIZES.FONT * 0.875} style={{ paddingHorizontal: theme.SIZES.BASE * 2.3 }}>
-              This is the perfect place to write a short description
-              of this step and even the next steps ahead
-            </Text>
-            <Block row center space="between" style={{ marginVertical: theme.SIZES.BASE * 1.875 }}>
-              <Block flex middle right>
-                <Button
-                  round
-                  onlyIcon
-                  iconSize={theme.SIZES.BASE * 1.625}
-                  icon="facebook"
-                  iconFamily="FontAwesome"
-                  color={theme.COLORS.FACEBOOK}
-                  shadowColor={theme.COLORS.FACEBOOK}
-                  iconColor={theme.COLORS.WHITE}
-                  style={styles.social}
-                  onPress={() => Alert.alert('Not implemented')}
-                />
-              </Block>
-              <Block flex middle center>
-                <Button
-                  round
-                  onlyIcon
-                  iconSize={theme.SIZES.BASE * 1.625}
-                  icon="twitter"
-                  iconFamily="FontAwesome"
-                  color={theme.COLORS.TWITTER}
-                  shadowColor={theme.COLORS.TWITTER}
-                  iconColor={theme.COLORS.WHITE}
-                  style={styles.social}
-                  onPress={() => Alert.alert('Not implemented')}
-                />
-              </Block>
-              <Block flex middle left>
-                <Button
-                  round
-                  onlyIcon
-                  iconSize={theme.SIZES.BASE * 1.625}
-                  icon="dribbble"
-                  iconFamily="FontAwesome"
-                  color={theme.COLORS.DRIBBBLE}
-                  shadowColor={theme.COLORS.DRIBBBLE}
-                  iconColor={theme.COLORS.WHITE}
-                  style={styles.social}
-                  onPress={() => Alert.alert('Not implemented')}
-                />
-              </Block>
-            </Block>
-            <Text muted center size={theme.SIZES.FONT * 0.875}>
-              or be classical
-            </Text>
-          </Block> */}
+      <Block safe flex style={styles.container, { backgroundColor: theme.COLORS.WHITE }}>
+        <View>
+          {activIndicator &&
+            (
+              <View style={styles.indicator}>
+                <ActivityIndicator size="large" color="#0000ff" />
+              </View>
+            )
+          }
 
-          <Block flex={2} center space="evenly">
-            <Block flex={2}>
-            <Input
-                rounded
-                placeholder="Full Name"
-                autoCapitalize="none"
-                style={{ width: width * 0.9 }}
-                value={this.state.email}
-                onChangeText={(text) => this.handleChange(text, 'name')}
-              />
-              <Input
-                rounded
-                type="email-address"
-                placeholder="Email"
-                autoCapitalize="none"
-                style={{ width: width * 0.9 }}
-                value={this.state.email}
-                onChangeText={(text) => this.handleChange(text, 'email')}
-              />
-              <Input
-                rounded
-                placeholder="Phone Number"
-                style={{ width: width * 0.9 }}
-                value={this.state.password}
-                onChangeText={(text) => this.handleChange(text, 'phoneNo')}
-              />
-              <Input
-                rounded
-                password
-                viewPass
-                placeholder="Password"
-                style={{ width: width * 0.9 }}
-                value={this.state.password}
-                onChangeText={(text) => this.handleChange(text, 'password')}
-              />
-              {/* <Text
-                color={theme.COLORS.ERROR}
-                size={theme.SIZES.FONT * 0.75}
-                onPress={() => Alert.alert('Not implemented')}
-                style={{ alignSelf: 'flex-end', lineHeight: theme.SIZES.FONT * 2 }}
-              >
-                Forgot your password?
-              </Text> */}
-            </Block>
-            <Block flex middle>
-              <Button
-                color = "info"
-                round
-                // color="error"
-//                 onPress={() => Alert.alert(
-//                   'Sign in action',
-//                   `Email: ${email}
-// Password: ${password}`,
-                // onPress = {() => this.saveUser()}
-              >
-                Sign Up
+          <KeyboardAwareScrollView >
+            <ScrollView showsVerticalScrollIndicator={false}>
+              <Block style={styles.container}>
+                <Block flex={2} center space="evenly">
+                  <Block style={styles.iconContainer}>
+                    <Image
+                      source={{
+                        uri: ICON
+                      }}
+                      //borderRadius style will help us make the Round Shape Image
+                      style={{ width: 100, height: 100, borderRadius: 100 / 2 }}
+                    />
+                  </Block>
+                  <Block style={styles.guidelineContainer}>
+                    <Text style={styles.text}>Guideline:</Text>
+                    <Text style={styles.text}>1. Display name: Alphanumeric & punctuation characters only! </Text>
+                    <Text style={styles.text}>2. Password: Minimum 8 characters, alphanumeric & punctuation characters only!</Text>
+                    <Text style={styles.text}>3. Phone Number / Emergency Contact: No need insert the '-'</Text>
+
+                  </Block>
+                  <Block flex={2}>
+                    <Input
+                      color={theme.COLORS.BLACK}
+                      placeholderTextColor={theme.COLORS.BLACK}
+                      rounded
+                      placeholder="Full Name"
+                      autoCapitalize="none"
+                      style={{ width: width * 0.9 }}
+                      value={this.state.full_name}
+                      onChangeText={(text) => this.handleChange(text, 'full_name')}
+                    />
+                    <Input
+                      color={theme.COLORS.BLACK}
+                      placeholderTextColor={theme.COLORS.BLACK}
+                      rounded
+                      placeholder="Display Name"
+                      autoCapitalize="none"
+                      style={{ width: width * 0.9 }}
+                      value={this.state.login}
+                      onChangeText={(text) => this.handleChange(text, 'login')}
+                    />
+                    <Input
+                      color={theme.COLORS.BLACK}
+                      placeholderTextColor={theme.COLORS.BLACK}
+                      rounded
+                      type="email-address"
+                      placeholder="Email"
+                      autoCapitalize="none"
+                      style={{ width: width * 0.9 }}
+                      value={this.state.email}
+                      onChangeText={(text) => this.handleChange(text, 'email')}
+                    />
+                    <Input
+                      type='phone-pad'
+                      color={theme.COLORS.BLACK}
+                      placeholderTextColor={theme.COLORS.BLACK}
+                      rounded
+                      placeholder="Phone Number"
+                      style={{ width: width * 0.9 }}
+                      value={this.state.phone}
+                      onChangeText={(text) => this.handleChange(text, 'phone')}
+                    />
+                    <Input
+                      color={theme.COLORS.BLACK}
+                      placeholderTextColor={theme.COLORS.BLACK}
+                      rounded
+                      password
+                      viewPass
+                      placeholder="Password"
+                      style={{ width: width * 0.9 }}
+                      value={this.state.password}
+                      onChangeText={(text) => this.handleChange(text, 'password')}
+                    />
+                    <Input
+                      type='phone-pad'
+                      color={theme.COLORS.BLACK}
+                      placeholderTextColor={theme.COLORS.BLACK}
+                      rounded
+                      placeholder="Emergency Contact"
+                      style={{ width: width * 0.9 }}
+                      value={this.state.emergencyContact}
+                      onChangeText={(text) => this.handleChange(text, 'emergencyContact')}
+                    />
+                  </Block>
+                  <Block style={{ padding: theme.SIZES.BASE }} flex middle>
+                    <Button
+                      color="info"
+                      round
+                      onPress={() => {
+                        this.setState({ activIndicator: true })
+                        FirebaseAuthService.register(this.state, navigation)
+                      }}
+                    >
+                      Register
               </Button>
-              {/* <Button color="transparent" shadowless onPress={() => navigation.navigate('Register')}>
-                <Text center color={theme.COLORS.ERROR} size={theme.SIZES.FONT * 0.75}>
-                  {"Don't have an account? Sign Up"}
-                </Text>
-              </Button> */}
-            </Block>
-          </Block>
-        </KeyboardAvoidingView>
-        {/* <Footer/> */}
+                  </Block>
+                </Block>
+              </Block>
+            </ScrollView>
+          </KeyboardAwareScrollView>
+        </View>
       </Block>
     );
   }
@@ -214,10 +167,38 @@ const styles = StyleSheet.create({
     paddingHorizontal: theme.SIZES.BASE,
     backgroundColor: theme.COLORS.WHITE,
   },
+  guidelineContainer: {
+    flex: 1,
+    paddingTop: theme.SIZES.BASE * 0.3,
+    paddingHorizontal: theme.SIZES.BASE,
+    backgroundColor: theme.COLORS.WHITE,
+  },
+  iconContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'space-around',
+    paddingTop: theme.SIZES.BASE * 0.5,
+    paddingBottom: theme.SIZES.BASE * 0.2,
+  },
+  text: {
+    marginTop: 2,
+    marginBottom: 2,
+    color: "#FF0000",
+    fontSize: 12
+  },
   social: {
     width: theme.SIZES.BASE * 3.5,
     height: theme.SIZES.BASE * 3.5,
     borderRadius: theme.SIZES.BASE * 1.75,
     justifyContent: 'center',
+  },
+  indicator: {
+    paddingTop: height * 0.3,
+    paddingBottom: height * 0.3,
+    position: 'absolute',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+    height: '100%',
   },
 });

@@ -1,10 +1,17 @@
 {
-  "name": "client",
-  "displayName": "client",
+  "name": "communicator",
+  "displayName": "communicator",
   "expo": {
-    "name": "client",
-    "slug": "client",
+    "name": "communicator",
+    "icon": "./assests/icon.png",
+    "slug": "communicator",
     "version": "1.0.0",
+    "splash": {
+      "image": "./assets/splash.gif",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "sdkVersion": "37.0.0",
     "platforms": [
       "ios",
       "android",
@@ -12,6 +19,9 @@
     ],
     "assetBundlePatterns": [
       "**/*"
-    ]
+    ],
+    "android": {
+      "package": "com.client"
+    }
   }
 }

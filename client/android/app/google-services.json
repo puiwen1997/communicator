@@ -1,0 +1,98 @@
+{
+  "project_info": {
+    "project_number": "381507719623",
+    "firebase_url": "https://myreactnative-33c0a.firebaseio.com",
+    "project_id": "myreactnative-33c0a",
+    "storage_bucket": "myreactnative-33c0a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:381507719623:android:96306bd73c92b54d9149e2",
+        "android_client_info": {
+          "package_name": "com.client"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "381507719623-inmdh8s7ao4hnmi7qsv3tp8uk1dlahmf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCbuhUSOQ-IKWKAdmzPdf0SpAlVFBDoLqY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "381507719623-inmdh8s7ao4hnmi7qsv3tp8uk1dlahmf.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:381507719623:android:aca8e0f0a509182d9149e2",
+        "android_client_info": {
+          "package_name": "com.finalyearproject"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "381507719623-inmdh8s7ao4hnmi7qsv3tp8uk1dlahmf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCbuhUSOQ-IKWKAdmzPdf0SpAlVFBDoLqY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "381507719623-inmdh8s7ao4hnmi7qsv3tp8uk1dlahmf.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:381507719623:android:8e78f27742cef7f39149e2",
+        "android_client_info": {
+          "package_name": "com.myreactnative"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "381507719623-inmdh8s7ao4hnmi7qsv3tp8uk1dlahmf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCbuhUSOQ-IKWKAdmzPdf0SpAlVFBDoLqY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "381507719623-inmdh8s7ao4hnmi7qsv3tp8uk1dlahmf.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

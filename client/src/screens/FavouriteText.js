@@ -1,12 +1,12 @@
 import React from 'react';
-import { TextInput, Modal, TouchableHighlight, Dimensions, KeyboardAvoidingView, View, ScrollView, StyleSheet } from 'react-native';
+import { ActivityIndicator, TextInput, Modal, TouchableHighlight, Dimensions, KeyboardAvoidingView, View, ScrollView, StyleSheet } from 'react-native';
 import { theme, Toast, Text, Block, Button, Input } from 'galio-framework';
 // import theme from '../theme';
 import tts from 'react-native-tts';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { text } from 'react-native-communications';
-
-const { height, width } = Dimensions.get('window');
+import Separator from '../components/Separator';
+import { firebase } from '../config/FirebaseConfig';
 
 const colourScheme = [
     "#004d80",
@@ -23,13 +23,18 @@ const colourScheme = [
     "#66c2ff"
 ]
 
+const width = Dimensions.get('window').width
+const height = Dimensions.get('window').height
+
 export default class FavouriteText extends React.Component {
     state = {
+        activIndicator: true,
         favouriteText: [],
         message: '',
         isVisible: false,
         id: '',
-        text: ''
+        text: '',
+        displayName: firebase.auth().currentUser.displayName
         // edit: {
         //     id: '',
         //     text: ''
@@ -51,8 +56,8 @@ export default class FavouriteText extends React.Component {
     }
 
     retrieve = () => {
-        fetch('https://communicator-server.herokuapp.com/tts/retrieve', {
-            // fetch('http://10.0.2.2:5000/tts/retrieve', {
+        fetch(`https://communicator-server.herokuapp.com/tts/retrieve/${this.state.displayName}`, {
+            // fetch(`http://10.0.2.2:5000/tts/retrieve/${this.state.displayName}`, {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
@@ -61,7 +66,7 @@ export default class FavouriteText extends React.Component {
         }).then((response) => response.json())
             .then((responseData) => {
                 // console.log(responseData);
-                this.setState({ favouriteText: responseData.defaultText });
+                this.setState({ activIndicator: false, favouriteText: responseData.defaultText });
                 // console.log(this.state.favouriteText);
             })
             .catch(error => console.warn(error));
@@ -69,22 +74,24 @@ export default class FavouriteText extends React.Component {
 
     edit = (id, text) => {
         fetch('https://communicator-server.herokuapp.com/tts/edit', {
-        // fetch('http://10.0.2.2:5000/tts/edit', {
+            // fetch('http://10.0.2.2:5000/tts/edit', {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
+                "displayName": this.state.displayName,
                 "id": id,
                 "editText": text
             })
         }).then((response) => response.json())
             .then((responseData) => {
                 console.log(responseData.data);
-                this.setState({ 
+                this.setState({
+                    isVisible: !this.state.isVisible,
                     favouriteText: responseData.data,
-                    message: responseData.message 
+                    message: responseData.message
                 });
                 console.log(this.state.message);
             })
@@ -94,12 +101,16 @@ export default class FavouriteText extends React.Component {
 
     delete = (id) => {
         fetch('https://communicator-server.herokuapp.com/tts/delete', {
+            // fetch('http://10.0.2.2:5000/tts/delete', {    
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ "id": id })
+            body: JSON.stringify({
+                "displayName": this.state.displayName,
+                "id": id
+            })
         }).then((response) => response.json())
             .then((responseData) => {
                 console.log(responseData);
@@ -126,11 +137,6 @@ export default class FavouriteText extends React.Component {
     }
 
     renderModal = () => {
-        // this.setState({isVisible: !this.state.isVisible})
-        // if (this.state.isVisible == true) {
-        // console.log("Hi")
-        // console.log(this.state.isVisible)
-        // console.log(this.state.text)
         return (
             <View style={styles.centeredView}>
                 <Modal
@@ -140,25 +146,29 @@ export default class FavouriteText extends React.Component {
                 >
                     <View style={styles.centeredView}>
                         <View style={styles.modalView}>
-                            <Text>Edit Here!</Text>
+                            <Text size={20}>Edit Here!</Text>
                             <TextInput
+                                style={styles.textInput}
+                                backgroundColor="#f2f2f2"
                                 defaultValue={this.state.text}
-                                onChangeText={(text) => this.handleChange(text, 'text') }>
+                                onChangeText={(text) => this.handleChange(text, 'text')}>
                             </TextInput>
-                            <Button 
-                                style={styles.modalButton} 
-                                color="info"
-                                onPress={() => this.edit(this.state.id, this.state.text)}>
-                                Save
+                            <View style={styles.centeredView}>
+                                <Button
+                                    style={styles.saveButton}
+                                    color="info"
+                                    onPress={() => this.edit(this.state.id, this.state.text)}>
+                                    Save
                             </Button>
-                            <Button
-                                style={styles.modalButton}
-                                color="error"
-                                round
-                                onPress={() => this.setState({ isVisible: !this.state.isVisible })}
-                            >
-                                Close
+                                <Button
+                                    style={styles.closeButton}
+                                    color="error"
+                                    round
+                                    onPress={() => this.setState({ isVisible: !this.state.isVisible })}
+                                >
+                                    Close
                             </Button>
+                            </View>
                         </View>
                     </View>
                 </Modal>
@@ -170,13 +180,10 @@ export default class FavouriteText extends React.Component {
     renderFavouriteText = (navigation) => {
         return (
             this.state.favouriteText.map(buttonInfo => (
-                <Block key={buttonInfo.id} row style={styles.block}>
-                    <Button
-                        style={styles.button}
-                        color='#b3ccff'
-                        onPress={() => this.convert(buttonInfo.text)}>
+                <Block style={styles.borderLine} key={buttonInfo.id} row>
+                    <TouchableHighlight style={styles.button} onPress={() => this.convert(buttonInfo.text)}>
                         <Text style={styles.text}>{buttonInfo.text}</Text>
-                    </Button>
+                    </TouchableHighlight>
                     <TouchableHighlight onPress={() => { this.renderEdit(buttonInfo.id, buttonInfo.text) }}>
                         <Block style={styles.buttonBlock} middle>
                             <MaterialIcons
@@ -195,6 +202,7 @@ export default class FavouriteText extends React.Component {
                             />
                         </Block>
                     </TouchableHighlight>
+                    <Separator />
                 </Block>
 
             ))
@@ -203,28 +211,46 @@ export default class FavouriteText extends React.Component {
 
     render() {
         const { navigation } = this.props;
+        const { activIndicator } = this.state;
         return (
-            <ScrollView showsVerticalScrollIndicator={false}>
-                <Block>
-                    {this.renderFavouriteText(navigation)}
-                </Block>
-                <Block>
-                    {this.renderModal()}
-                </Block>
-            </ScrollView>
+            <View style={{ flex: 1 }}>
+                {activIndicator &&
+                    (
+                        <View style={styles.indicator}>
+                            <ActivityIndicator size="large" color="#0000ff" />
+                        </View>
+                    )
+                }
+
+                <ScrollView showsVerticalScrollIndicator={false}>
+
+                    <Block>
+                        {this.renderFavouriteText(navigation)}
+                    </Block>
+                    <Block>
+                        {this.renderModal()}
+                    </Block>
+
+                </ScrollView>
+
+
+            </View>
         )
     }
 }
 
 const styles = StyleSheet.create({
+    borderLine: {
+        borderBottomWidth: 0.5,
+        borderColor: 'black',
+    },
     block: {
-        backgroundColor: '#b3ccff',
+        // backgroundColor: '#b3ccff',
         marginBottom: 5
     },
     buttonBlock: {
         width: (width / 16 * 1.5),
-        paddingTop: 7,
-        // paddingBottom: 3,
+        paddingTop: 10,
     },
     input: {
         padding: theme.SIZES.BASE,
@@ -238,7 +264,13 @@ const styles = StyleSheet.create({
         fontSize: 16,
         padding: theme.SIZES.BASE
     },
-    modalButton: {
+    saveButton: {
+        width: width * 0.8,
+        margin: 20,
+        marginTop: 15
+    },
+    closeButton: {
+        margin: 20,
         padding: 5,
         width: width / 4
     },
@@ -249,7 +281,14 @@ const styles = StyleSheet.create({
         margin: 10,
         marginTop: 22
     },
+    textInput: {
+        margin: 20,
+        width: width * 0.8,
+        height: height * 0.1,
+    },
     modalView: {
+        width: width * 0.9,
+        height: height * 0.5,
         margin: 20,
         backgroundColor: "white",
         borderRadius: 20,
@@ -278,5 +317,14 @@ const styles = StyleSheet.create({
     modalText: {
         marginBottom: 15,
         textAlign: "center"
+    },
+    indicator: {
+        paddingTop: height * 0.3,
+        paddingBottom: height * 0.3,
+        position: 'absolute',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '100%',
+        height: '100%',
     }
 })

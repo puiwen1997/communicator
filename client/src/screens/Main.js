@@ -3,6 +3,7 @@ import { View, TouchableHighlight, ScrollView, StyleSheet, Dimensions } from 're
 import { theme, Text, Block, Button } from 'galio-framework';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import AntDesign from 'react-native-vector-icons/AntDesign';
 
 const { height, width } = Dimensions.get('screen');
 
@@ -10,8 +11,7 @@ export default class Main extends React.Component {
   renderMenu = () => {
     const { title, navigation } = this.props;
     return (
-      <Block>
-
+      <Block flex>
         <Block row flex>
           <TouchableHighlight onPress={() => navigation.navigate('TTS')}>
             <Block middle style={styles.block}>
@@ -43,13 +43,13 @@ export default class Main extends React.Component {
               <Text>Sign Language</Text>
             </Block>
           </TouchableHighlight>
-          <TouchableHighlight onPress={() => navigation.navigate('Settings')}>
+          <TouchableHighlight onPress={() => navigation.navigate('Profile')}>
             <Block middle style={styles.block}>
-              <MaterialIcons
+              <AntDesign
                 size={(height - 288) / 6}
-                name='settings'
+                name='profile'
               />
-              <Text>Settings</Text>
+              <Text>Profile</Text>
             </Block>
           </TouchableHighlight>
         </Block>
@@ -65,17 +65,21 @@ export default class Main extends React.Component {
           </TouchableHighlight>
         </Block> */}
 
-        <Block>
-          <TouchableHighlight onPress={() => navigation.navigate('FavouriteText')}>
-            <Block margin={theme.SIZES.BASE * 1.5} marginTop={0} marginBottom={0} right>
-              <MaterialIcons
-                name='star'
-                color='pink'
-                size={width/12}
-              />
-              <Text size={8} muted>Go to favourite</Text>
-            </Block>
-          </TouchableHighlight>
+        <Block flex right>
+          <Button
+            color="pink"
+            onlyIcon
+            large
+            style={styles.favouriteButton}
+            icon="favorite"
+            iconFamily="MaterialIcons"
+            iconSize={theme.SIZES.BASE * 1.2}
+            onPress={() => {
+              navigation.navigate('FavouriteText')
+            }}>
+            Go to favourite
+            </Button>
+            <Text style={styles.favouriteButton} color="#000000" size={9} muted>Go to favourite</Text>
         </Block>
       </Block>
     )
@@ -105,6 +109,8 @@ const styles = StyleSheet.create({
     width: (width - 96) / 2,
     height: (height - 336) / 2,
     margin: theme.SIZES.BASE,
+    marginTop: 10,
+    marginBottom: 10,
     borderRadius: 5,
     backgroundColor: "#b3ccff",
     shadowColor: theme.COLORS.WHITE
@@ -198,4 +204,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     elevation: 2,
   },
+  favouriteButton: {
+    width: (width - 64) / 5,
+    // padding: theme.SIZES.BASE,
+    marginTop: 10,
+    marginRight: theme.SIZES.BASE
+},
 })

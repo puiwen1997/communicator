@@ -43,8 +43,8 @@ target 'client' do
 
   # react-native-cli autolinking
   use_native_modules!
-  pod 'react-native-image-picker', :path => '../node_modules/react-native-image-picker'
 
-  pod 'react-native-geolocation', :path => '../node_modules/@react-native-community/geolocation'
+
+
 
 end

@@ -1,10 +1,11 @@
 import React from 'react';
 import { TouchableHighlight, Dimensions, KeyboardAvoidingView, View, ScrollView, StyleSheet, Modal, Alert } from 'react-native';
-import { theme, Toast, Text, Block, Button, Input, Card } from 'galio-framework';
-import tts from 'react-native-tts';
+import { theme, Text, Block, Button } from 'galio-framework';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
-// import Modal from 'react-native-modal';
+import { AutoGrowingTextInput } from 'react-native-autogrow-textinput'
+import { firebase } from '../config/FirebaseConfig';
+import tts from 'react-native-tts';
 
 const { height, width } = Dimensions.get('window');
 
@@ -13,7 +14,8 @@ export default class TextToSpeech extends React.Component {
         text: "",
         message: "",
         isVisible: false,
-        isFavourite: false
+        isFavourite: false,
+        displayName: firebase.auth().currentUser.displayName
     };
 
     handleChange = (text, field) => {
@@ -39,17 +41,18 @@ export default class TextToSpeech extends React.Component {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
+                    "displayName": this.state.displayName,
                     "text": this.state.text
                 })
             }).then((response) => response.json())
                 .then((responseData) => {
-                    this.setState({
-                        message: responseData.message,
-                        isVisible: !this.state.isVisible,
-                        // isFavourite: !this.state.isFavourite
-                    });
-                })
-                .catch(function (error) {
+                    if (responseData.message != null) {
+                        this.setState({
+                            message: responseData.message,
+                            isVisible: !this.state.isVisible,
+                        });
+                    }
+                }).catch(function (error) {
                     console.log('There has been a problem with your fetch operation: ' + error.message);
                     throw error;
                 });
@@ -89,7 +92,7 @@ export default class TextToSpeech extends React.Component {
             return (
                 <FontAwesome
                     name='star-o'
-                    size={20}
+                    size={30}
                 />
             )
         } else {
@@ -104,26 +107,27 @@ export default class TextToSpeech extends React.Component {
 
     render() {
         const { navigation } = this.props;
+
         return (
             <Block flex style={styles.block}>
                 <ScrollView showsVerticalScrollIndicator={false}>
-                    <KeyboardAvoidingView style={{ flex: 1 }} behavior="height" enabled>
+                    <KeyboardAvoidingView behavior="height" enabled>
                         <Block flex right>
                             <TouchableHighlight onPress={() => this.save()}>
-                                {this.renderIcon()}
+                                <FontAwesome name='star-o' size={30} color="#000000" />
                             </TouchableHighlight>
                         </Block>
                         <Block>
-                            <Input
-                            id={1}
-                                color={theme.COLORS.BLACK}
-                                label='Text'
-                                placeholder='Please enter the text you would like to translate.'
-                                style={styles.input}
-                                icon = "cancel"
-                                family = "MaterialIcons"
-                                right
+                            <AutoGrowingTextInput
+                                backgroundColor="#ffffff"
+                                style={styles.textInput}
+                                placeholder="Please enter the text..."
+                                placeholderTextColor="black"
+                                value={this.state.text}
                                 onChangeText={(text) => this.handleChange(text, 'text')}
+                                maxHeight={170}
+                                minHeight={50}
+                                enableScrollToCaret
                             />
                         </Block>
                         <Block>
@@ -136,16 +140,20 @@ export default class TextToSpeech extends React.Component {
                         </Block>
                         <Block flex middle right>
                             <Button
-                                color="success"
+                                color="pink"
                                 onlyIcon
                                 large
                                 style={styles.favouriteButton}
-                                icon="navigate-next"
+                                icon="favorite"
                                 iconFamily="MaterialIcons"
-                                onPress={() => navigation.navigate('FavouriteText')}>
+                                iconSize={theme.SIZES.BASE * 1.2}
+                                onPress={() => {
+                                    this.setState({ text: '' })
+                                    navigation.navigate('FavouriteText')
+                                }}>
                                 Go to favourite
                             </Button>
-                            <Text size={8} muted>Go to favourite</Text>
+                            <Text color="#000000" size={theme.SIZES.BASE * 0.8} muted>Go to favourite</Text>
                             {this.renderModal(this.state.message)}
                         </Block>
                     </KeyboardAvoidingView>
@@ -158,8 +166,6 @@ export default class TextToSpeech extends React.Component {
 const styles = StyleSheet.create({
     block: {
         padding: theme.SIZES.BASE,
-        paddingBottom: theme.SIZES.BASE * 5,
-        paddingVertical: theme.SIZES.BASE,
         margin: 10
     },
     input: {
@@ -167,6 +173,7 @@ const styles = StyleSheet.create({
         height: height * 0.2,
     },
     button: {
+        fontSize: theme.SIZES.BASE,
         width: width - 64,
         padding: theme.SIZES.BASE,
         margin: 10
@@ -174,10 +181,10 @@ const styles = StyleSheet.create({
     favouriteButton: {
         width: (width - 64) / 5,
         padding: theme.SIZES.BASE,
-        marginTop: 20
+        marginTop: theme.SIZES.BASE * 4
     },
     modalButton: {
-        width: width/4
+        width: width / 4
     },
     centeredView: {
         flex: 1,
@@ -213,7 +220,20 @@ const styles = StyleSheet.create({
         textAlign: "center"
     },
     modalText: {
-        marginBottom: 15,
+        fontSize: 18,
+        marginBottom: 18,
         textAlign: "center"
+    },
+    textInput: {
+        marginLeft: 10,
+        marginRight: 10,
+        marginTop: theme.SIZES.BASE * 3,
+        marginBottom: theme.SIZES.BASE,
+        width: width - 64,
+        padding: theme.SIZES.BASE,
+        fontSize: theme.SIZES.BASE
+        // margin: 10
+        // width: width * 0.8,
+        // height: height * 0.1,
     }
 })

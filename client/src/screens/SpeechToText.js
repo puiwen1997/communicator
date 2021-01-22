@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
 import {
+  ActivityIndicator,
   StyleSheet,
   Text,
   View,
-  SafeAreaView,
-  Image,
+  Alert,
   TouchableHighlight,
   ScrollView,
   Dimensions
@@ -25,6 +25,7 @@ export default class SpeechToText extends Component {
     started: '',
     results: [],
     partialResults: [],
+    activIndicator: false
   };
 
   constructor(props) {
@@ -94,6 +95,8 @@ export default class SpeechToText extends Component {
   _startRecognizing = async () => {
     //Starts listening for speech for a specific locale
     this.setState({
+      activIndicator: true,
+      isRecorded: false,
       pitch: '',
       error: '',
       started: '',
@@ -111,9 +114,13 @@ export default class SpeechToText extends Component {
   };
 
   _stopRecognizing = async () => {
+    this.setState({
+      activIndicator: false
+    })
     //Stops listening for speech
     try {
       await Voice.stop();
+      this.setState({ isRecorded: true })
     } catch (e) {
       //eslint-disable-next-line
       console.error(e);
@@ -148,46 +155,55 @@ export default class SpeechToText extends Component {
     });
   };
 
-  // renderIcon = () => {
-  //   if (this.state.started=' ') {
-  //     return (
-  //       <FontAwesome
-  //     size={(height - 288) / 6}
-  //     name='microphone'
-  //   />
-  //     );
-  //   } else {
-  //     return (
-  //       <Feather
-  //     size={(height - 288) / 6}
-  //     name='loader'
-  //   />
-  //     );
-  //   }
-  // }
+  renderResult = async() => {
+    try {
+      this.state.partialResults.map((result, index) => {
+        return (
+          <Text
+            key={`partial-result-${index}`}
+            style={{
+              fontSize: 16,
+              textAlign: 'center',
+              color: '#B0171F',
+              marginBottom: 1,
+              fontWeight: '700',
+            }}>
+            {result}
+          </Text>
+        );
+      })
+
+    } catch(error) {
+      console.log("Error", error)
+      Alert.alert("Error", error)
+    }
+  }
 
   render() {
+    const { activIndicator } = this.state
     return (
-      <SafeAreaView style={{ flex: 1 }}>
+      <View style={{ flex: 1 }}>
         <View style={styles.container}>
+          {activIndicator &&
+            (
+              <View style={styles.indicator}>
+                <ActivityIndicator size="large" color="#0000ff" />
+              </View>
+            )
+          }
           <Text muted style={styles.instructions}>
             Press the mic to speak
           </Text>
           <TouchableHighlight
-            onPress={this._startRecognizing}
+            onPressIn={this._startRecognizing}
+            onPress={this._stopRecognizing}
             style={{ marginVertical: 20 }}>
             <FontAwesome
               size={(height - 288) / 6}
               name='microphone'
             />
           </TouchableHighlight>
-          <Text
-            style={{
-              textAlign: 'center',
-              color: '#B0171F',
-              marginBottom: 1,
-              fontWeight: '700',
-            }}>
+          <Text style={styles.header}>
             Results
           </Text>
           <ScrollView>
@@ -204,11 +220,11 @@ export default class SpeechToText extends Component {
                   }}>
                   {result}
                 </Text>
-              );
+              )
             })}
           </ScrollView>
         </View>
-      </SafeAreaView>
+      </View>
     );
   }
 }
@@ -238,6 +254,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   instructions: {
+    fontSize: 18,
     textAlign: 'center',
     color: '#333333',
     marginBottom: theme.SIZES.BASE,
@@ -249,4 +266,20 @@ const styles = StyleSheet.create({
     marginBottom: 1,
     marginTop: 30,
   },
+  indicator: {
+    paddingTop: height * 0.3,
+    paddingBottom: height * 0.3,
+    position: 'absolute',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+    height: '100%',
+  },
+  header: {
+    fontSize: 18,
+    textAlign: 'center',
+    color: '#B0171F',
+    marginBottom: 1,
+    fontWeight: '700',
+  }
 });

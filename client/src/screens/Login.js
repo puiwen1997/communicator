@@ -1,188 +1,137 @@
 import React from 'react';
-import {
-  TouchableOpacity, Alert, Dimensions, KeyboardAvoidingView, StyleSheet, Platform,
-} from 'react-native';
-// import db from '../Firebase';
-// import Header from '../components/Header';
-// import Footer from '../components/Footer';
+import { Modal, View, ActivityIndicator, Dimensions, StyleSheet, Image } from 'react-native';
 
-// galio component
-import {
-  theme, Block, Button, Input, NavBar, Text, Icon
-} from 'galio-framework';
-// import theme from '../theme';
+import { theme, Block, Button, Input, Text } from 'galio-framework';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
+import { firebase } from '../config/FirebaseConfig';
+import ConnectyCubeAuthService from '../services/ConnectyCubeAuthService';
+import FirebaseAuthService from '../services/FirebaseAuthService';
+import ConnectyCubeUser from '../models/ConnectyCubeUser';
 
 const { height, width } = Dimensions.get('window');
+const ICON = "https://firebasestorage.googleapis.com/v0/b/myreactnative-33c0a.appspot.com/o/icon%2Ficon.jpg?alt=media&token=f95bd882-7d3d-4d41-8c94-d37d5a34dacc"
 
-class Login extends React.Component {
-  constructor() {
-    super();
-    // this.dbRef = firebase.firestore().collection('user');
+export default class Login extends React.Component {
+  constructor(props) {
+    super(props)
     this.state = {
+      activIndicator: false,
       email: '',
       password: '',
       isLoading: false,
-    };
-  }
-
-  // state = {
-  //   email: '-',
-  //   password: '-',
-  // }
+      isVisible: false,
+    }
+  };
 
   handleChange = (text, field) => {
     const state = this.state
     state[field] = text;
     this.setState(state);
-    console.log(state);
   }
 
-  // addItem = (email, password) => {
-  //   db.ref('/user').push({
-  //     email: this.state.email,
-  //     password: this.state.password
-  //   })
-  // }
+  renderModal = () => {
+    return (
+      <View style={styles.centeredView}>
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={this.state.isVisible}
+        >
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <Text style={styles.modalText}>Loading...</Text>
+              <ActivityIndicator size="large" color="#0000ff" />
+            </View>
+          </View>
+        </Modal>
+      </View>
+    )
+  }
 
-  // saveUser = () => {
-  //   console.log('saving');
-  //   this.addItem(this.state.email, this.state.password)
-  //   alert("Success")
-  // this.setState({
-  //   isLoading: true,
-  // });
-  // this.dbRef.add({
-  //   email: this.state.email,
-  //   password: this.state.password
-  // }).then((res) => {
-  //   this.setState({
-  //     email: '',
-  //     password: '',
-  //     isLoading: false,
-  //   })
-  //   this.props.navigation.navigate('Home')
-  //   .catch((error) => {
-  //     console.error("Error adding document: ", error);
-  //     this.setState({
-  //       isLoading: false,
-  //     });
-  //   });
-  //   console.log("Save");
-  // }
+  onLogin = async (navigation) => {
+    this.setState({ activIndicator: true })
+    FirebaseAuthService.login(this.state, navigation)
+  }
+
+  componentDidMount() {
+    const { navigation } = this.props;
+    ConnectyCubeAuthService.connectyInit(navigation)
+  }
 
   render() {
     const { navigation } = this.props;
-    // const { email, password } = this.state;
+    const { activIndicator } = this.state;
 
     return (
-      <Block safe flex style={{ backgroundColor: theme.COLORS.WHITE }}>
-        {/* <Header title='Sign In'/> */}
-        <KeyboardAvoidingView style={styles.container} behavior="height" enabled>
-          {/* <Block flex center style={{ marginTop: theme.SIZES.BASE * 1.875, marginBottom: height * 0.1 }}>
-            <Text muted center size={theme.SIZES.FONT * 0.875} style={{ paddingHorizontal: theme.SIZES.BASE * 2.3 }}>
-              This is the perfect place to write a short description
-              of this step and even the next steps ahead
-            </Text>
-            <Block row center space="between" style={{ marginVertical: theme.SIZES.BASE * 1.875 }}>
-              <Block flex middle right>
-                <Button
-                  round
-                  onlyIcon
-                  iconSize={theme.SIZES.BASE * 1.625}
-                  icon="facebook"
-                  iconFamily="FontAwesome"
-                  color={theme.COLORS.FACEBOOK}
-                  shadowColor={theme.COLORS.FACEBOOK}
-                  iconColor={theme.COLORS.WHITE}
-                  style={styles.social}
-                  onPress={() => Alert.alert('Not implemented')}
-                />
+      <View style={{ flex: 1 }}>
+        { activIndicator &&
+          (
+            <View style={styles.indicator}>
+              <ActivityIndicator size="large" color="#0000ff" />
+            </View>
+          )
+        }
+        <Block safe flex style={{ backgroundColor: theme.COLORS.WHITE }}>
+          <View>
+            <KeyboardAwareScrollView>
+              <Block style={styles.container}>
+                <Block center space="evenly">
+                  <Block style={styles.iconContainer}>
+                    <Image
+                      source={{
+                        uri: ICON
+                      }}
+                      //borderRadius style will help us make the Round Shape Image
+                      style={{ width: 100, height: 100, borderRadius: 100 / 2 }}
+                    />
+                  </Block>
+                  <Block>
+                    <Input
+                      color={theme.COLORS.BLACK}
+                      type="email-address"
+                      rounded
+                      placeholderTextColor={theme.COLORS.BLACK}
+                      placeholder="Email"
+                      autoCapitalize="none"
+                      style={{ width: width * 0.9 }}
+                      value={this.state.email}
+                      onChangeText={(text) => this.handleChange(text, 'email')}
+                    />
+                    <Input
+                      color={theme.COLORS.BLACK}
+                      rounded
+                      password
+                      viewPass
+                      placeholderTextColor={theme.COLORS.BLACK}
+                      placeholder="Password"
+                      style={{ width: width * 0.9 }}
+                      value={this.state.password}
+                      onChangeText={(text) => this.handleChange(text, 'password')}
+                    />
+                  </Block>
+                  <Block style={{ padding: theme.SIZES.BASE }} flex middle>
+                    <Button
+                      round
+                      color="info"
+                      onPress={() => {
+                        FirebaseAuthService.login(this.state, navigation)
+                      }}
+                    >
+                      Login
+              </Button>
+                    <Button color="transparent" shadowless onPress={() => navigation.navigate('Register')}>
+                      <Text center color={theme.COLORS.ERROR} size={theme.SIZES.FONT * 0.9}>
+                        {"Don't have an account? Click here to register"}
+                      </Text>
+                    </Button>
+                  </Block>
+                </Block>
               </Block>
-              <Block flex middle center>
-                <Button
-                  round
-                  onlyIcon
-                  iconSize={theme.SIZES.BASE * 1.625}
-                  icon="twitter"
-                  iconFamily="FontAwesome"
-                  color={theme.COLORS.TWITTER}
-                  shadowColor={theme.COLORS.TWITTER}
-                  iconColor={theme.COLORS.WHITE}
-                  style={styles.social}
-                  onPress={() => Alert.alert('Not implemented')}
-                />
-              </Block>
-              <Block flex middle left>
-                <Button
-                  round
-                  onlyIcon
-                  iconSize={theme.SIZES.BASE * 1.625}
-                  icon="dribbble"
-                  iconFamily="FontAwesome"
-                  color={theme.COLORS.DRIBBBLE}
-                  shadowColor={theme.COLORS.DRIBBBLE}
-                  iconColor={theme.COLORS.WHITE}
-                  style={styles.social}
-                  onPress={() => Alert.alert('Not implemented')}
-                />
-              </Block>
-            </Block>
-            <Text muted center size={theme.SIZES.FONT * 0.875}>
-              or be classical
-            </Text>
-          </Block> */}
+            </KeyboardAwareScrollView>
+          </View>
+        </Block>
+      </View>
 
-          <Block flex={2} center space="evenly">
-            <Block flex={2}>
-              <Input
-                type="email-address"
-                rounded
-                placeholder="Email"
-                autoCapitalize="none"
-                style={{ width: width * 0.9 }}
-                value={this.state.email}
-                onChangeText={(text) => this.handleChange(text, 'email')}
-              />
-              <Input
-                rounded
-                password
-                viewPass
-                placeholder="Password"
-                style={{ width: width * 0.9 }}
-                value={this.state.password}
-                onChangeText={(text) => this.handleChange(text, 'password')}
-              />
-              <Text
-                color={theme.COLORS.ERROR}
-                size={theme.SIZES.FONT * 0.75}
-                onPress={() => Alert.alert('Not implemented')}
-                style={{ alignSelf: 'flex-end', lineHeight: theme.SIZES.FONT * 2 }}
-              >
-                Forgot your password?
-              </Text>
-            </Block>
-            <Block flex middle>
-              <Button
-                round
-                color="info"
-              //                 onPress={() => Alert.alert(
-              //                   'Sign in action',
-              //                   `Email: ${email}
-              // Password: ${password}`,
-              // onPress = {() => this.saveUser()}
-              >
-                Sign in
-              </Button>
-              <Button color="transparent" shadowless onPress={() => navigation.navigate('Register')}>
-                <Text center color={theme.COLORS.ERROR} size={theme.SIZES.FONT * 0.75}>
-                  {"Don't have an account? Click here to register"}
-                </Text>
-              </Button>
-            </Block>
-          </Block>
-        </KeyboardAvoidingView>
-        {/* <Footer/> */}
-      </Block>
     );
   }
 }
@@ -193,8 +142,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-around',
     paddingTop: theme.SIZES.BASE * 0.3,
-    paddingHorizontal: theme.SIZES.BASE,
     backgroundColor: theme.COLORS.WHITE,
+  },
+  iconContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'space-around',
+    paddingTop: theme.SIZES.BASE * 2.5,
+    paddingBottom: theme.SIZES.BASE,
   },
   social: {
     width: theme.SIZES.BASE * 3.5,
@@ -202,6 +157,55 @@ const styles = StyleSheet.create({
     borderRadius: theme.SIZES.BASE * 1.75,
     justifyContent: 'center',
   },
+  indicator: {
+    position: 'absolute',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+    height: '100%',
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    margin: 10,
+    marginTop: 22
+  },
+  textInput: {
+    margin: 20,
+    width: width * 0.8,
+    height: height * 0.1,
+  },
+  modalView: {
+    width: width * 0.9,
+    height: height * 0.5,
+    margin: 20,
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 35,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5
+  },
+  openButton: {
+    backgroundColor: "#F194FF",
+    borderRadius: 20,
+    padding: 10,
+    elevation: 2
+  },
+  textStyle: {
+    color: "white",
+    fontWeight: "bold",
+    textAlign: "center"
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: "center"
+  },
 });
-
-export default Login;

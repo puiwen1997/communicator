@@ -46,7 +46,7 @@ const styles = StyleSheet.create({
     textAlign: 'center'
   },
   navbar: {
-    backgroundColor: "#4d88ff",
+    backgroundColor: "#70b8ff",
     paddingVertical: 0,
     paddingBottom: theme.SIZES.BASE * 1.5,
     paddingTop: theme.SIZES.BASE * 1.5,
