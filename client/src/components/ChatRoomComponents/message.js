@@ -180,8 +180,8 @@ export default class Message extends Component {
     const fileName = fileString[0]
     console.log(typeof fileName);
 
-    // fetch('https://communicator-server.herokuapp.com/transcribe', {
-    fetch('http://10.0.2.2:5000/transcribe', {
+    fetch('https://communicator-server.herokuapp.com/transcribe', {
+    // fetch('http://10.0.2.2:5000/transcribe', {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
